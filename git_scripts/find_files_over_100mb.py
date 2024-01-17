@@ -1,9 +1,9 @@
 # AINT nobody has time for GITLFS
 from pathlib import Path
+from lazy_log import logger
+FILE_SIZE_TOO_BIG = 100000000 # 100mb
 
-FILE_SIZE_TOO_BIG = 100000000
-
-source_folder = Path('C:\\GitHub\\ProceduWorld_Unreal\\ProceduWorld')
+source_folder = Path('C:\\GitHub\\')
 
 
 def find_big_files_in_folder(folder: Path, big_size: int = None) -> list[Path]:
@@ -46,6 +46,6 @@ if __name__ == '__main__':
     import pprint
 
     the_big_files = find_big_files_in_folder(source_folder)
-    print(f'num big files: {len(the_big_files)}')
+    logger.info(f'num big files: {len(the_big_files)}')
     pprint.pprint(the_big_files)
     # delete_files(the_big_files)
