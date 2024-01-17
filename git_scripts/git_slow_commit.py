@@ -1,24 +1,22 @@
 """
-
+This script is used to commit and force push files to a remote Git branch in chunks.
+This helps with githubs tendency to choke on large commits.
+In the future I want to do size buckets instead of file number buckets but this worked so i stopped haha.
 """
-import logging
-import sys
+
 from pathlib import Path
 
 import git
 
-logger = logging.getLogger(__name__)
-logger.level = logging.INFO
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler = logging.StreamHandler(stream=sys.stdout)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+from lazy_log import logger
 
-NUM_FILES = 50
-PROJECT_GIT_ROOT = Path('C:\\GitHub\\ProceduWorld_Unreal\\')
+NUM_FILES = 50  # files per commit
+PROJECT_GIT_ROOT = Path('C:\\GitHub\\')
 
 
 def get_files_from_folder(folder: Path) -> list[Path]:
+    """Get all files in a folder and return them as a list of Path objects.
+    """
     files: list[Path] = []
     for file in folder.glob('**/*'):
         if file.is_file():
@@ -28,18 +26,24 @@ def get_files_from_folder(folder: Path) -> list[Path]:
 
 
 def get_untracked_files(folder: Path) -> list[Path]:
+    """Get all untracked files in a folder and return them as a list of Path objects.
+    """
     repo = git.Repo(folder)
     untracked_files = [Path(file) for file in repo.untracked_files]
     return untracked_files
 
 
 def get_uncommited_files(folder: Path) -> list[Path]:
+    """Get all uncommitted files in a folder and return them as a list of Path objects.
+    """
     repo = git.Repo(folder)
     uncommited_files = [Path(file.a_path) for file in repo.index.diff(None)]
     return uncommited_files
 
 
 def split_list_into_chunks(the_list: list, chunk_size: int = None) -> list[list]:
+    """Split a list into chunks and return the chunks as a list of lists.
+    """
     if chunk_size is None:
         chunk_size = NUM_FILES
 
@@ -47,6 +51,8 @@ def split_list_into_chunks(the_list: list, chunk_size: int = None) -> list[list]
 
 
 def git_commit_and_force_push_files_to_remote_branch(files: list[Path], branch_name: str, commit_message: str) -> None:
+    """Commit and force push a list of files to a remote branch.
+    """
     repo = git.Repo(PROJECT_GIT_ROOT)
     for file_path in files:
         try:
@@ -78,5 +84,5 @@ if __name__ == '__main__':
         logger.info(f'\n\nchunk size: {len(chunk)}')
         pprint.pprint(chunk, indent=4)
         git_commit_and_force_push_files_to_remote_branch(chunk, the_branch_name, f'uncommited files: {iter}')
-        
+
     logger.info('Finished!')
